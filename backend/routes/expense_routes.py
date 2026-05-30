@@ -18,6 +18,11 @@ def _get_user_email():
     return email.lower() if email else None
 
 
+def _check_db():
+    """Check if database is connected, return error if not"""
+    if expenses is None or users is None:
+        return {"error": "Database connection failed"}, 503
+
 @expense_bp.route("/auth/signup", methods=["POST"])
 def signup():
     data = request.json or {}
