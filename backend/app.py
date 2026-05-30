@@ -28,6 +28,15 @@ app = Flask(
 
 app.register_blueprint(expense_bp)
 
+@app.route("/health")
+def health():
+    """Health check endpoint that doesn't require database"""
+    return jsonify({
+        "status": "ok",
+        "template_exists": os.path.exists(template_dir),
+        "static_exists": os.path.exists(static_dir)
+    }), 200
+
 @app.route("/")
 def home():
     try:
