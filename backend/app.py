@@ -4,12 +4,19 @@ import traceback
 from flask import Flask, jsonify, render_template
 from routes.expense_routes import expense_bp
 
-# Get the absolute path to frontend directories
-base_dir = os.path.dirname(os.path.abspath(__file__))
-template_dir = os.path.join(os.path.dirname(base_dir), "frontend", "templates")
-static_dir = os.path.join(os.path.dirname(base_dir), "frontend", "static")
+# Determine the correct paths - backend is in /backend, frontend is in /frontend at repo root
+# __file__ = /backend/app.py
+# os.path.abspath(__file__) = /full/path/to/backend/app.py
+# os.path.dirname(...) = /full/path/to/backend
+# os.path.dirname(dirname) = /full/path/to/repo/root
 
-print(f"DEBUG: base_dir = {base_dir}", file=sys.stderr)
+backend_dir = os.path.dirname(os.path.abspath(__file__))
+repo_root = os.path.dirname(backend_dir)
+template_dir = os.path.join(repo_root, "frontend", "templates")
+static_dir = os.path.join(repo_root, "frontend", "static")
+
+print(f"DEBUG: backend_dir = {backend_dir}", file=sys.stderr)
+print(f"DEBUG: repo_root = {repo_root}", file=sys.stderr)
 print(f"DEBUG: template_dir = {template_dir}", file=sys.stderr)
 print(f"DEBUG: static_dir = {static_dir}", file=sys.stderr)
 print(f"DEBUG: template_dir exists = {os.path.exists(template_dir)}", file=sys.stderr)
@@ -33,8 +40,13 @@ def health():
     """Health check endpoint that doesn't require database"""
     return jsonify({
         "status": "ok",
+        "backend_dir": backend_dir,
+        "repo_root": repo_root,
+        "template_dir": template_dir,
+        "static_dir": static_dir,
         "template_exists": os.path.exists(template_dir),
-        "static_exists": os.path.exists(static_dir)
+        "static_exists": os.path.exists(static_dir),
+        "repo_root_contents": os.listdir(repo_root) if os.path.exists(repo_root) else []
     }), 200
 
 @app.route("/")
