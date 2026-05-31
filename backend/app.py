@@ -3,6 +3,7 @@ import sys
 import traceback
 from flask import Flask, jsonify, render_template
 from routes.expense_routes import expense_bp
+from database.db import expenses, users
 
 # Determine the correct paths - backend is in /backend, frontend is in /frontend at repo root
 # __file__ = /backend/app.py
@@ -48,6 +49,27 @@ def health():
         "static_exists": os.path.exists(static_dir),
         "repo_root_contents": os.listdir(repo_root) if os.path.exists(repo_root) else []
     }), 200
+
+
+@app.route("/dbcheck")
+def dbcheck():
+    """Database connectivity check - returns users count or error details."""
+    try:
+        if users is None or expenses is None:
+            return jsonify({"status": "error", "message": "Database not initialized"}), 503
+
+        # perform a lightweight operation
+        users_count = users.count_documents({})
+        expenses_count = expenses.count_documents({})
+        return jsonify({
+            "status": "ok",
+            "users_count": int(users_count),
+            "expenses_count": int(expenses_count)
+        }), 200
+    except Exception as e:
+        import traceback as _tb
+        _tb.print_exc()
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route("/")
 def home():
